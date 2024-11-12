@@ -46,6 +46,14 @@ export default function LoginPage() {
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" required />
+            <div className="flex justify-end">
+              <Link
+                href="/forgot-password"
+                className="text-sm font-medium text-right text-primary hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">

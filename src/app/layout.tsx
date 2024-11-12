@@ -34,11 +34,10 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem
           disableTransitionOnChange
         >
           <div className="bg-background ">{children}</div>
-          <div className=" fixed top-0 left-0 p-10">
+          <div className=" fixed top-0 right-0 p-2">
             <ModeToggle />
           </div>
         </ThemeProvider>
