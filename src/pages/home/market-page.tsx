@@ -14,7 +14,6 @@ import { Toggle } from "@/components/ui/toggle";
 import Image from "next/image";
 import { getRandomProducts } from "@/lib/api/products";
 
-
 type Product = {
   id: string;
   name: string;
@@ -35,8 +34,6 @@ export default function ProductListing(): JSX.Element {
       setLoading(true);
       try {
         const response = await getRandomProducts();
-        
-        // Log the full response for debugging
         console.log("API Response:", response);
   
         if (response.error) {
@@ -44,17 +41,16 @@ export default function ProductListing(): JSX.Element {
           return;
         }
   
-        // Transform API data to match the `Product` structure
         const transformedProducts = response.body?.products.map((product) => ({
           id: product.id,
-          name: product.name,
+          name: decodeURIComponent(product.name), // Decode if necessary
           price: product.price,
           isNew: product.transactions.length > 1,
           isDamaged: product.transactions.length < 2,
-          image: "/placeholder.png",
+          image: product.transactions[0].image_url,
         }));
-        if(transformedProducts!=null)
-          setProducts(transformedProducts);
+  
+        if (transformedProducts) setProducts(transformedProducts);
       } catch (error) {
         console.error("An error occurred while fetching products:", error);
       } finally {
