@@ -2,6 +2,11 @@ import { User } from "../user/models";
 import { Transaction } from "../transactions/models";
 export type ProductStatus = "available" | "restored" | "sold";
 
+
+export type Products = {
+  products: ProductResponse[];
+}
+
 export type ProductResponse = {
   id: string;
   name: string;
