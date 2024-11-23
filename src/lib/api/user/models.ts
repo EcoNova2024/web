@@ -4,6 +4,7 @@ export type User = {
   id: string;
   image_url: string;
   name: string;
+  password: string
   verified: boolean;
 };
 

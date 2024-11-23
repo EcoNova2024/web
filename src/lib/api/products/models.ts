@@ -34,4 +34,18 @@ export type ProductRequest = {
   user_id: string;           
 };
 
-
+export type DetailedProductResponse = {
+  id: string;
+  name: string;
+  category: string;
+  sub_category: string;
+  description: string;
+  price: number;
+  rating: number;             
+  rating_average: number;      
+  rating_count: number;        
+  created_at: string;
+  status: ProductStatus;
+  transactions: Transaction[];
+  user_id: string;  
+}

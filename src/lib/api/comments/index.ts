@@ -1,5 +1,5 @@
 import { apiFetch } from "..";
-import { Comment, AddComment } from "./models";
+import { Comment, Comments, AddComment } from "./models";
 
 const BASE_END_POINT = "comments";
 
@@ -12,7 +12,7 @@ export async function createComment(data: AddComment) {
 }
 
 export async function getCommentsByProduct(productId: string) {
-  return await apiFetch<Comment[]>({
+  return await apiFetch<Comments>({
     method: "GET",
     endpoint: `${BASE_END_POINT}/product/${productId}`,
   });

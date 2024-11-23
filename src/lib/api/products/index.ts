@@ -1,10 +1,10 @@
 import { apiFetch } from "..";
-import { ProductResponse, ProductRequest, Products } from "./models";
+import { ProductResponse, DetailedProductResponse, ProductRequest, Products } from "./models";
 
 const BASE_END_POINT = "products";
 
 export async function getProduct(productId: string) {
-  return await apiFetch<ProductResponse>({
+  return await apiFetch<DetailedProductResponse>({
     method: "GET",
     endpoint: `${BASE_END_POINT}?id=${productId}`,
     headers: { accept: "application/json" },

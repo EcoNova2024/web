@@ -11,41 +11,33 @@ import { UpdateUser,
 
 const BASE_END_POINT = "users";
 
-export async function getUser(userId: string) {
-  return await apiFetch<User>({
-    method: "GET",
-    endpoint: `${BASE_END_POINT}/${userId}`,
-  });
-}
-
-export async function updateUser(userId: string, data: UpdateUser) {
+export async function updateUser(data: UpdateUser) {
   return await apiFetch<User>({
     method: "PUT",
-    endpoint: `${BASE_END_POINT}/${userId}`,
+    endpoint: `${BASE_END_POINT}`,
     payload: data,
   });
 }
 
-export async function updateEmail(data: UpdateEmailParams) {
+export async function getUserByEmail(email: string) {
   return await apiFetch<User>({
+    method: "GET",
+    endpoint: `${BASE_END_POINT}/email?email=${email}`,
+  });
+}
+
+export async function updateEmail(data: UpdateEmailParams) {
+  return await apiFetch<User>({ // look again //
     method: "PUT",
     endpoint: `${BASE_END_POINT}/email`,
     payload: data,
   });
 }
 
-export async function updatePassword(token:string,data: UpdatePasswordParams) {
-  return await apiFetch<User>({
-    method: "PUT",
-    endpoint: `${BASE_END_POINT}/password?token=${token}`,
-    payload: data,
-  });
-}
-
-export async function sendPasswordResetCode(data: ResetPasswordParams) {
-  return await apiFetch<User>({
+export async function sendVerification(data: VerificationParams) {
+  return await apiFetch<User>({ // look again //
     method: "POST",
-    endpoint: `${BASE_END_POINT}/password/reset`,
+    endpoint: `${BASE_END_POINT}/send-verification`,
     payload: data,
   });
 }
@@ -58,23 +50,31 @@ export async function login(data: LoginParams) {
   });
 }
 
-export async function sendVerification(data: VerificationParams) {
-  return await apiFetch<User>({
+export async function updatePassword(token:string,data: UpdatePasswordParams) {
+  return await apiFetch<User>({ // look again //
+    method: "PUT",
+    endpoint: `${BASE_END_POINT}/password?token=${token}`,
+    payload: data,
+  });
+}
+
+export async function sendPasswordResetCode(data: ResetPasswordParams) {
+  return await apiFetch<User>({ // look again //
     method: "POST",
-    endpoint: `${BASE_END_POINT}/send-verification`,
+    endpoint: `${BASE_END_POINT}/password/reset`,
     payload: data,
   });
 }
 
 export async function seachUsers(name: string) {
-  return await apiFetch<User>({
+  return await apiFetch<User[]>({
     method: "GET",
     endpoint: `${BASE_END_POINT}/search?name=${name}`,
   });
 }
 
 export async function signup(data: SignupParams) {
-  return await apiFetch<{ token: string }>({
+  return await apiFetch<User>({
     method: "POST",
     endpoint: `${BASE_END_POINT}/signup`,
     payload: data,
@@ -82,15 +82,15 @@ export async function signup(data: SignupParams) {
 }
 
 export async function verifyUser(token: string) {
-  return await apiFetch<User>({
+  return await apiFetch<User>({ // look again //
     method: "POST",
     endpoint: `${BASE_END_POINT}/verify?token=${token}`,
   });
 }
 
-export async function getUserByEmail(email: string) {
+export async function getUser(userId: string) {
   return await apiFetch<User>({
     method: "GET",
-    endpoint: `${BASE_END_POINT}/email?email=${email}`,
+    endpoint: `${BASE_END_POINT}/${userId}`,
   });
 }

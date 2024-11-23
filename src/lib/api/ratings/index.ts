@@ -1,5 +1,5 @@
 import { apiFetch } from "..";
-import { Rating, AddRating } from "./models";
+import { Rating, AddRating, RatingResponse, Ratings } from "./models";
 
 const BASE_END_POINT = "ratings";
 
@@ -12,14 +12,14 @@ export async function createRating(data: AddRating) {
 }
 
 export async function getAverageAndTotalRatingByProductId(productId: string) {
-  return await apiFetch<Rating[]>({
+  return await apiFetch<RatingResponse>({
     method: "GET",
-    endpoint: `${BASE_END_POINT}/${productId}/average`,
+    endpoint: `${BASE_END_POINT}/product/${productId}/average`,
   });
 }
 
 export async function getRatingsByUser(userId: string) {
-  return await apiFetch<Rating[]>({
+  return await apiFetch<Ratings>({
     method: "GET",
     endpoint: `${BASE_END_POINT}/user/${userId}`,
   });
