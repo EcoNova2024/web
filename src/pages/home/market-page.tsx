@@ -83,7 +83,7 @@ export default function ProductListing(): JSX.Element {
   }
 
   const handleViewDetails = (productId: string): void => {
-    router.push(`/home/product/${productId}`)
+    router.push(`/home/market/product/${productId}`)
   }
 
   const filteredProducts = products.filter((product: Product) => {

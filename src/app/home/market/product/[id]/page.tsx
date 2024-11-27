@@ -1,4 +1,5 @@
 "use client"
+
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { format } from "date-fns"
@@ -14,37 +15,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, Truck, RefreshCw, ShieldCheck } from "lucide-react"
-import { getProduct } from "@/lib/api/products"
-import { useRouter } from "next/router"
+import { getRandomProducts } from "@/lib/api/products"
 import { DetailedProductResponse } from "@/lib/api/products/models"
 import { Transaction } from "@/lib/api/transactions/models"
+import { useParams } from "next/navigation"
 
 export default function ProductDetail() {
   const [product, setProduct] = useState<DetailedProductResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState("")
-
-  const router = useRouter()
-  const { id } = router.query
-
+  const id = useParams()?.id
+  console.log(id)
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true)
       try {
-        const response = await getProduct(id as string)
+        const response = await getRandomProducts()
         if (response.error) {
-          console.error("Failed to fetch product:", response.error.message)
-          return
+          throw new Error(`Failed to fetch product: ${response.error.message}`)
         }
-        if (response.body) {
+
+        const foundProduct = response.body?.products.find((p) => p.id === id)
+        if (!foundProduct) {
+          throw new Error("Product not found")
+        }
+        if (foundProduct) {
           setProduct({
-            ...response.body,
-            transactions: response.body.transactions.map(
+            ...foundProduct,
+            transactions: foundProduct.transactions.map(
               (transaction: Transaction) => ({
                 ...transaction,
                 photo_url: transaction.image_url,
               })
             ),
+            user_id: foundProduct.user.name,
           })
           if (product) {
             const mainImage =
@@ -56,7 +60,7 @@ export default function ProductDetail() {
           }
         }
       } catch (error) {
-        console.error("An error occurred while fetching product:", error)
+        console.error(error)
       } finally {
         setLoading(false)
       }
@@ -67,12 +71,11 @@ export default function ProductDetail() {
     }
   }, [id])
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("tr-TR", {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("tr-TR", {
       style: "currency",
       currency: "TRY",
     }).format(price)
-  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -92,7 +95,7 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 mt-14">
       <Card>
         <CardContent className="p-6">
           <div className="grid md:grid-cols-2 gap-8">
@@ -185,11 +188,11 @@ export default function ProductDetail() {
                 <TabsContent value="details">
                   <ul className="list-disc pl-5">
                     <li>
-                      <span className="font-semibold">Kategori:</span>
+                      <span className="font-semibold">Kategori:</span>{" "}
                       {product.category}
                     </li>
                     <li>
-                      <span className="font-semibold">Alt Kategori:</span>
+                      <span className="font-semibold">Alt Kategori:</span>{" "}
                       {product.sub_category}
                     </li>
                     <li>
@@ -197,7 +200,7 @@ export default function ProductDetail() {
                       {format(new Date(product.created_at), "dd.MM.yyyy HH:mm")}
                     </li>
                     <li>
-                      <span className="font-semibold">Satıcı ID:</span>
+                      <span className="font-semibold">Satıcı ID:</span>{" "}
                       {product.user_id}
                     </li>
                   </ul>
