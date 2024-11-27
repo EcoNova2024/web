@@ -1,5 +1,10 @@
 import { apiFetch } from ".."
-import { ProductResponse, DetailedProductResponse, ProductRequest, Products } from "./models"
+import {
+  ProductResponse,
+  DetailedProductResponse,
+  ProductRequest,
+  Products,
+} from "./models"
 
 const BASE_END_POINT = "products"
 
@@ -60,7 +65,11 @@ export async function getRatedProducts(userId: string) {
   })
 }
 
-export async function getProductsByStatus(status: string, limit: string, page: string) {
+export async function getProductsByStatus(
+  status: string,
+  limit: string,
+  page: string
+) {
   return await apiFetch<Products>({
     method: "GET",
     endpoint: `${BASE_END_POINT}/status?status=${status}&limit=${limit}&page=${page}`,
@@ -68,7 +77,11 @@ export async function getProductsByStatus(status: string, limit: string, page: s
   })
 }
 
-export async function getProductsOfUser(userId: string, count: string, page: string) {
+export async function getProductsOfUser(
+  userId: string,
+  count: string,
+  page: string
+) {
   return await apiFetch<Products>({
     method: "GET",
     endpoint: `${BASE_END_POINT}/user?user_id=${userId}&count=${count}&page=${page}`,

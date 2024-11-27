@@ -1,46 +1,48 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Toggle } from "@/components/ui/toggle";
-import Image from "next/image";
-import { getRandomProducts } from "@/lib/api/products";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Toggle } from "@/components/ui/toggle"
+import Image from "next/image"
+import { getRandomProducts } from "@/lib/api/products"
 
 type Product = {
-  id: string;
-  name: string;
-  price: number;
-  isNew: boolean;
-  isDamaged: boolean;
-  image: string;
-};
+  id: string
+  name: string
+  price: number
+  isNew: boolean
+  isDamaged: boolean
+  image: string
+}
 
 export default function ProductListing(): JSX.Element {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [showNewProducts, setShowNewProducts] = useState<boolean>(false);
-  const [showDamagedProducts, setShowDamagedProducts] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [products, setProducts] = useState<Product[]>([])
+  const [showNewProducts, setShowNewProducts] = useState<boolean>(false)
+  const [showDamagedProducts, setShowDamagedProducts] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
+  const router = useRouter()
 
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const response = await getRandomProducts();
-        console.log("API Response:", response);
-  
+        const response = await getRandomProducts()
+        console.log("API Response:", response)
+
         if (response.error) {
-          console.error("Failed to fetch products:", response.error.message);
-          return;
+          console.error("Failed to fetch products:", response.error.message)
+          return
         }
-  
+
         const transformedProducts = response.body?.products.map((product) => ({
           id: product.id,
           name: decodeURIComponent(product.name), // Decode if necessary
@@ -48,43 +50,47 @@ export default function ProductListing(): JSX.Element {
           isNew: product.transactions.length > 1,
           isDamaged: product.transactions.length < 2,
           image: product.transactions[0].image_url,
-        }));
-  
-        if (transformedProducts) setProducts(transformedProducts);
+        }))
+
+        if (transformedProducts) setProducts(transformedProducts)
       } catch (error) {
-        console.error("An error occurred while fetching products:", error);
+        console.error("An error occurred while fetching products:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-  
-    fetchProducts();
-  }, []);
+    }
+
+    fetchProducts()
+  }, [])
 
   const handleNewProductsToggle = (newValue: boolean): void => {
     if (newValue && showDamagedProducts) {
-      setShowDamagedProducts(false);
+      setShowDamagedProducts(false)
     }
-    setShowNewProducts(newValue);
-  };
+    setShowNewProducts(newValue)
+  }
 
   const handleDamagedProductsToggle = (newValue: boolean): void => {
     if (newValue && showNewProducts) {
-      setShowNewProducts(false);
+      setShowNewProducts(false)
     }
-    setShowDamagedProducts(newValue);
-  };
+    setShowDamagedProducts(newValue)
+  }
 
   const handleShowAll = (): void => {
-    setShowNewProducts(false);
-    setShowDamagedProducts(false);
-  };
+    setShowNewProducts(false)
+    setShowDamagedProducts(false)
+  }
+
+  const handleViewDetails = (productId: string): void => {
+    router.push(`/home/product/${productId}`)
+  }
 
   const filteredProducts = products.filter((product: Product) => {
-    if (showNewProducts && !product.isNew) return false;
-    if (showDamagedProducts && !product.isDamaged) return false;
-    return true;
-  });
+    if (showNewProducts && !product.isNew) return false
+    if (showDamagedProducts && !product.isDamaged) return false
+    return true
+  })
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -135,12 +141,17 @@ export default function ProductListing(): JSX.Element {
                 </div>
               </CardContent>
               <CardFooter className="p-4 pt-0">
-                <Button className="w-full">Sepete Ekle</Button>
+                <Button
+                  className="w-full"
+                  onClick={() => handleViewDetails(product.id)}
+                >
+                  Detaylar
+                </Button>
               </CardFooter>
             </Card>
           ))}
         </div>
       )}
     </div>
-  );
+  )
 }
