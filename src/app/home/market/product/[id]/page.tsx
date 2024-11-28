@@ -23,7 +23,7 @@ import { useParams } from "next/navigation"
 export default function ProductDetail() {
   const [product, setProduct] = useState<DetailedProductResponse | null>(null)
   const [loading, setLoading] = useState(true)
-  const [currentImage, setCurrentImage] = useState("")
+  const [currentImage, setCurrentImage] = useState("/image.png")
   const id = useParams()?.id
   console.log(id)
   useEffect(() => {
@@ -50,14 +50,6 @@ export default function ProductDetail() {
             ),
             user_id: foundProduct.user.name,
           })
-          if (product) {
-            const mainImage =
-              product.transactions[product?.transactions.length - 1]
-                ?.image_url ||
-              "/placeholder.svg?height=600&width=600&text=No+Image"
-
-            setCurrentImage(mainImage)
-          }
         }
       } catch (error) {
         console.error(error)
@@ -70,6 +62,14 @@ export default function ProductDetail() {
       fetchProduct()
     }
   }, [id])
+
+  useEffect(() => {
+    if (product) {
+      setCurrentImage(
+        product.transactions[product.transactions.length - 1].image_url
+      )
+    }
+  }, [product])
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("tr-TR", {
@@ -102,7 +102,7 @@ export default function ProductDetail() {
             <div>
               <div className="relative w-full aspect-square mb-4">
                 <Image
-                  src={currentImage}
+                  src={currentImage ? currentImage : "/image.png"}
                   alt={product.name}
                   fill
                   className="object-cover rounded-lg"
