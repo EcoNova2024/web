@@ -220,12 +220,6 @@ export default function ProductDetail() {
                       <span className="font-semibold">Decrsiption:</span>{" "}
                       {product.description}
                     </li>
-                    <div>
-                      <h1 className="text-xl font-bold text-left mb-8 pt-14">
-                        Önerilen Ürünler
-                      </h1>
-                      <ProductSlider products={products} />
-                    </div>
                   </ul>
                 </TabsContent>
                 <TabsContent value="shipping">
@@ -236,6 +230,12 @@ export default function ProductDetail() {
                 </TabsContent>
               </Tabs>
             </div>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-left mb-8 pt-14">
+              Önerilen Ürünler
+            </h1>
+            <ProductSlider products={products} />
           </div>
         </CardContent>
       </Card>
