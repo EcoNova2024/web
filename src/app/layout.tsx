@@ -37,7 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="bg-background ">{children}</div>
-          <div className=" fixed top-0 right-0 p-2">
+          <div className="md:hidden fixed top-0 right-0 p-2 z-50">
             <ModeToggle />
           </div>
         </ThemeProvider>

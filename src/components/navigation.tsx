@@ -32,7 +32,12 @@ export default function ResponsiveNavigation() {
   return (
     <>
       {/* Top Navigation for larger screens */}
-      <nav className="hidden md:block fixed top-0 left-0 right-0 bg-background border-b border-border z-50">
+      <nav
+        className={cn(
+          "hidden md:block fixed top-0 left-0 right-0 bg-background border-b border-border z-50 transition-all duration-300 ease-in-out ",
+          isScrolled ? "translate-y-[-100px]" : "translate-y-0"
+        )}
+      >
         <div className="max-w-screen-xl mx-auto px-4 flex justify-between items-center">
           <div>
             <Link href="/" className="flex items-center">
@@ -76,8 +81,7 @@ export default function ResponsiveNavigation() {
       {/* Bottom Navigation for mobile */}
       <nav
         className={cn(
-          "md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border transition-all duration-300 ease-in-out z-50",
-          isScrolled ? "translate-y-full" : "translate-y-0"
+          "md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border transition-all duration-300 ease-in-out z-50"
         )}
       >
         <div className="max-w-screen-xl mx-auto px-4">
@@ -101,7 +105,7 @@ export default function ResponsiveNavigation() {
           </ul>
         </div>
       </nav>
-      <div className="fixed top-0 left-0 p-2">
+      <div className="md:hidden fixed top-0 left-0 p-2 z-50">
         <UserAvatarMenu />
       </div>
     </>
