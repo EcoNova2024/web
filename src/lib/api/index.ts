@@ -74,9 +74,6 @@ export async function apiFetch<T>({
 
     // Handle HTTP errors (non-2xx status codes)
     if (!response.ok) {
-      console.error("API error:", response.status, response.statusText)
-      console.debug("Response Body:", body)
-
       const errorMessage = `Error occurred: ${response.statusText}`
       return {
         body: null,
