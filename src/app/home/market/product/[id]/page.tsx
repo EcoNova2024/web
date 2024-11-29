@@ -14,62 +14,79 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Star, Truck, RefreshCw, ShieldCheck } from "lucide-react"
-import { getRandomProducts } from "@/lib/api/products"
+import { Star } from "lucide-react"
+import { getRecommendationsByProductId } from "@/lib/api/products"
 import { DetailedProductResponse } from "@/lib/api/products/models"
 import { Transaction } from "@/lib/api/transactions/models"
 import { useParams } from "next/navigation"
+import ProductSlider from "@/components/home-slider"
+
+type Product = {
+  id: string
+  name: string
+  description: string
+  price: number
+  image: string
+}
 
 export default function ProductDetail() {
+  const [products, setProducts] = useState<Product[]>([])
   const [product, setProduct] = useState<DetailedProductResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentImage, setCurrentImage] = useState("/image.png")
   const id = useParams()?.id
   console.log(id)
+
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductDetails = async (id: string) => {
       setLoading(true)
       try {
-        const response = await getRandomProducts()
-        if (response.error) {
-          throw new Error(`Failed to fetch product: ${response.error.message}`)
+        // Fetch product list for suggestions
+        const productResponse = await getRecommendationsByProductId(id)
+        if (productResponse.error) {
+          throw new Error(`Failed to fetch products: ${productResponse.error.message}`)
         }
 
-        const foundProduct = response.body?.products.find((p) => p.id === id)
+        const transformedProducts = productResponse.body?.products.map((p) => ({
+          id: p.id,
+          name: decodeURIComponent(p.name),
+          price: p.price,
+          image: p.transactions[0]?.image_url || "/image.png",
+          description: p.description,
+        }))
+        setProducts(transformedProducts || [])
+
+        // Fetch single product details
+        const foundProduct = productResponse.body?.products.find((p) => p.id === id)
         if (!foundProduct) {
           throw new Error("Product not found")
         }
-        if (foundProduct) {
-          setProduct({
-            ...foundProduct,
-            transactions: foundProduct.transactions.map(
-              (transaction: Transaction) => ({
-                ...transaction,
-                photo_url: transaction.image_url,
-              })
-            ),
-            user_id: foundProduct.user.name,
-          })
-        }
+
+        setProduct({
+          ...foundProduct,
+          transactions: foundProduct.transactions.map((transaction: Transaction) => ({
+            ...transaction,
+            photo_url: transaction.image_url,
+          })),
+          user_id: foundProduct.user.name,
+        })
+
+        setCurrentImage(
+          foundProduct.transactions.length > 0
+            ? foundProduct.transactions[foundProduct.transactions.length - 1].image_url
+            : "/image.png"
+        )
       } catch (error) {
-        console.error(error)
+        console.error("Error fetching product data:", error)
       } finally {
         setLoading(false)
       }
     }
 
     if (id) {
-      fetchProduct()
+      fetchProductDetails(id)
     }
   }, [id])
-
-  useEffect(() => {
-    if (product) {
-      setCurrentImage(
-        product.transactions[product.transactions.length - 1].image_url
-      )
-    }
-  }, [product])
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("tr-TR", {
@@ -90,8 +107,12 @@ export default function ProductDetail() {
     }
   }
 
+  const handleCarouselImageClick = (imageUrl: string) => {
+    setCurrentImage(imageUrl)
+  }
+
   if (loading || !product) {
-    return <div>Loading...</div> // Consider replacing this with a proper loading component or spinner
+    return <div>Loading...</div>
   }
 
   return (
@@ -110,24 +131,28 @@ export default function ProductDetail() {
               </div>
               <Carousel className="w-full max-w-xs mx-auto">
                 <CarouselContent>
-                  {product.transactions.map((transaction, index) => (
-                    <CarouselItem
-                      key={transaction.id}
-                      className="basis-1/4 md:basis-1/5"
-                    >
-                      <div
-                        className="relative aspect-square cursor-pointer"
-                        onClick={() => setCurrentImage(transaction.image_url)}
+                  {product.transactions.length > 0 ? (
+                    product.transactions.map((transaction, index) => (
+                      <CarouselItem
+                        key={transaction.id}
+                        className="basis-1/4 md:basis-1/5"
                       >
-                        <Image
-                          src={transaction.image_url}
-                          alt={`${product.name} - Image ${index + 1}`}
-                          fill
-                          className="object-cover rounded"
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
+                        <div
+                          className="relative aspect-square cursor-pointer"
+                          onClick={() => handleCarouselImageClick(transaction.image_url)}
+                        >
+                          <Image
+                            src={transaction.image_url}
+                            alt={`${product.name} - Image ${index + 1}`}
+                            fill
+                            className="object-cover rounded"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))
+                  ) : (
+                    <div className="text-center">No images available</div>
+                  )}
                 </CarouselContent>
                 <CarouselPrevious />
                 <CarouselNext />
@@ -165,18 +190,6 @@ export default function ProductDetail() {
               </div>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="flex items-center">
-                  <Truck className="mr-2" />
-                  <span className="text-sm">Ücretsiz Kargo</span>
-                </div>
-                <div className="flex items-center">
-                  <RefreshCw className="mr-2" />
-                  <span className="text-sm">30 Gün İade</span>
-                </div>
-                <div className="flex items-center">
-                  <ShieldCheck className="mr-2" />
-                  <span className="text-sm">2 Yıl Garanti</span>
-                </div>
-                <div className="flex items-center">
                   {getStatusBadge(product.status)}
                 </div>
               </div>
@@ -203,6 +216,16 @@ export default function ProductDetail() {
                       <span className="font-semibold">Satıcı ID:</span>{" "}
                       {product.user_id}
                     </li>
+                    <li>
+                      <span className="font-semibold">Decrsiption:</span>{" "}
+                      {product.description}
+                    </li>
+                    <div>
+                      <h1 className="text-xl font-bold text-left mb-8 pt-14">
+                        Önerilen Ürünler
+                      </h1>
+                      <ProductSlider products={products} />
+                    </div>
                   </ul>
                 </TabsContent>
                 <TabsContent value="shipping">

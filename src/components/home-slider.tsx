@@ -15,7 +15,7 @@ import Image from "next/image"
 
 // Ürün türünü tanımlama
 type Product = {
-  id: number
+  id: string
   name: string
   description: string
   price: number
