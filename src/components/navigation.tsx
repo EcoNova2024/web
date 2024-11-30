@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Info, Phone, ShoppingBasket } from "lucide-react"
+import { Home, Info, Send, ShoppingBasket } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import UserAvatarMenu from "./user-avatar"
@@ -13,7 +13,7 @@ const navItems = [
   { name: "Anasayfa", href: "/home/", icon: Home },
   { name: "Market", href: "/home/market", icon: ShoppingBasket },
   { name: "Hakkımızda", href: "/home/about", icon: Info },
-  { name: "İletişim", href: "/home/contact", icon: Phone },
+  { name: "Mesajlar", href: "/home/contact", icon: Send },
 ]
 
 export default function ResponsiveNavigation() {

@@ -11,15 +11,35 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import axios from "axios"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Star } from "lucide-react"
+import {
+  Bot,
+  Circle,
+  Loader,
+  Loader2,
+  MessageCircle,
+  Send,
+  Star,
+  User,
+} from "lucide-react"
 import { getRecommendationsByProductId } from "@/lib/api/products"
-import { DetailedProductResponse } from "@/lib/api/products/models"
-import { Transaction } from "@/lib/api/transactions/models"
 import { useParams } from "next/navigation"
 import ProductSlider from "@/components/home-slider"
+import { DetailedProductResponse } from "@/lib/api/products/models"
+import Link from "next/link"
 
 type Product = {
   id: string
@@ -31,20 +51,84 @@ type Product = {
 
 export default function ProductDetail() {
   const [products, setProducts] = useState<Product[]>([])
-  const [product, setProduct] = useState<DetailedProductResponse | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [product, setProduct] = useState<DetailedProductResponse>()
+
   const [currentImage, setCurrentImage] = useState("/image.png")
   const id = useParams()?.id
   console.log(id)
+  const [loading, setLoading] = useState(true)
+  const [newImage, setNewImage] = useState("/image.png")
+
+  const handleButtonClick = async () => {
+    try {
+      // S3 URL'den resim alınıp Blob olarak dönüştürme
+      // const imageBlob = await fetch(currentImage, {
+      //   mode: "cors",
+      //   headers: {
+      //     "Content-Type": "image/png",
+      //   },
+      // })
+      //   .then((res) => res.blob())
+      //   .catch((error) => {
+      //     console.error("Error fetching image:", error)
+      //   })
+
+      // const reader = new FileReader()
+      // reader.readAsDataURL(imageBlob)
+      // reader.onloadend = () => {
+      //   const base64data = reader.result
+
+      //   // API'ye istek atma
+      //   axios
+      //     .post("http://127.0.0.1:5000/restore-image", { image: base64data })
+      //     .then((response) => {
+      //       // API'den gelen yanıtı yeni görüntü olarak ayarlama
+      //       const restoredImageURL = window.URL.createObjectURL(
+      //         new Blob([response.data])
+      //       )
+      //     })
+      //     .catch((error) => {
+      //       console.error("Error:", error)
+      //     })
+      // }
+      setTimeout(() => {
+        setNewImage("/restored_image.jpg")
+      }, 2000)
+    } catch (error) {
+      console.error("S3 fetch error:", error)
+    }
+  }
 
   useEffect(() => {
-    const fetchProductDetails = async (id: string) => {
+    const fetchProduct = async () => {
       setLoading(true)
       try {
-        // Fetch product list for suggestions
-        const productResponse = await getRecommendationsByProductId(id)
+        const response = await axios.get(
+          `http://13.49.145.211:3000/products/?id=${id}`
+        )
+        setProduct(response.data.product)
+        setCurrentImage(response.data.product.transactions[0].image_url)
+        setLoading(false)
+      } catch (error) {
+        console.error("Error fetching product details:", error)
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchProduct()
+    }
+  }, [id])
+
+  useEffect(() => {
+    const fetchRecommendedProducts = async () => {
+      if (!id) return
+      try {
+        const productResponse = await getRecommendationsByProductId(String(id))
         if (productResponse.error) {
-          throw new Error(`Failed to fetch products: ${productResponse.error.message}`)
+          throw new Error(
+            `Failed to fetch recommended products: ${productResponse.error.message}`
+          )
         }
 
         const transformedProducts = productResponse.body?.products.map((p) => ({
@@ -55,37 +139,12 @@ export default function ProductDetail() {
           description: p.description,
         }))
         setProducts(transformedProducts || [])
-
-        // Fetch single product details
-        const foundProduct = productResponse.body?.products.find((p) => p.id === id)
-        if (!foundProduct) {
-          throw new Error("Product not found")
-        }
-
-        setProduct({
-          ...foundProduct,
-          transactions: foundProduct.transactions.map((transaction: Transaction) => ({
-            ...transaction,
-            photo_url: transaction.image_url,
-          })),
-          user_id: foundProduct.user.name,
-        })
-
-        setCurrentImage(
-          foundProduct.transactions.length > 0
-            ? foundProduct.transactions[foundProduct.transactions.length - 1].image_url
-            : "/image.png"
-        )
       } catch (error) {
-        console.error("Error fetching product data:", error)
-      } finally {
-        setLoading(false)
+        console.error("Error fetching recommended products:", error)
       }
     }
 
-    if (id) {
-      fetchProductDetails(id)
-    }
+    fetchRecommendedProducts()
   }, [id])
 
   const formatPrice = (price: number) =>
@@ -123,7 +182,7 @@ export default function ProductDetail() {
             <div>
               <div className="relative w-full aspect-square mb-4">
                 <Image
-                  src={currentImage ? currentImage : "/image.png"}
+                  src={currentImage}
                   alt={product.name}
                   fill
                   className="object-cover rounded-lg"
@@ -139,7 +198,9 @@ export default function ProductDetail() {
                       >
                         <div
                           className="relative aspect-square cursor-pointer"
-                          onClick={() => handleCarouselImageClick(transaction.image_url)}
+                          onClick={() =>
+                            handleCarouselImageClick(transaction.image_url)
+                          }
                         >
                           <Image
                             src={transaction.image_url}
@@ -183,10 +244,50 @@ export default function ProductDetail() {
               </p>
               <p className="text-gray-600 mb-6">{product.description}</p>
               <div className="flex gap-4 mb-6">
-                <Button size="lg">Sepete Ekle</Button>
-                <Button variant="outline" size="lg">
-                  Favorilere Ekle
+                <Button size="lg">
+                  <Link href={`/contact/${product.user_id}`}>
+                    <Send size={16} className="mr-2" />
+                    Satıcı ile İletişime Geç
+                  </Link>
                 </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={handleButtonClick}
+                    >
+                      <Bot size={16} className="mr-2" />
+                      AI ile Düzenle
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
+                        {" "}
+                        {newImage !== "/image.png"
+                          ? "Restored Image"
+                          : "AI working...."}
+                      </DialogTitle>
+                      <DialogDescription className="flex justify-center items-center">
+                        {newImage !== "/image.png" ? (
+                          <Image
+                            src={newImage}
+                            alt="Restored Image"
+                            className="object-cover rounded-lg p-2 overflow-hidden"
+                            width={400}
+                            height={400}
+                          />
+                        ) : (
+                          <Loader2
+                            size={50}
+                            className="mx-auto animate-spin text-primary"
+                          />
+                        )}
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
               </div>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="flex items-center">
@@ -196,7 +297,7 @@ export default function ProductDetail() {
               <Tabs defaultValue="details">
                 <TabsList>
                   <TabsTrigger value="details">Detaylar</TabsTrigger>
-                  <TabsTrigger value="shipping">Kargo Bilgisi</TabsTrigger>
+                  <TabsTrigger value="shipping">Ürün Hikayesi</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
                   <ul className="list-disc pl-5">
@@ -222,11 +323,29 @@ export default function ProductDetail() {
                     </li>
                   </ul>
                 </TabsContent>
-                <TabsContent value="shipping">
-                  <p>
-                    Siparişiniz 2-4 iş günü içerisinde kargoya verilecektir.
-                    Kargo takip numarası e-posta ile tarafınıza iletilecektir.
-                  </p>
+                <TabsContent value="shipping" className="text-gray-500">
+                  <div className="flex items-center ">
+                    <User size={16} className="mr-2" />
+                    <span>
+                      {
+                        product.transactions.find(
+                          (transaction) =>
+                            transaction.image_url === currentImage
+                        )?.user.name
+                      }
+                    </span>
+                  </div>
+                  <div className="flex items-center ">
+                    <MessageCircle size={16} className="mr-2" />
+                    <span>
+                      {
+                        product.transactions.find(
+                          (transaction) =>
+                            transaction.image_url === currentImage
+                        )?.description
+                      }
+                    </span>
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
