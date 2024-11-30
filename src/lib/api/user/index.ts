@@ -6,7 +6,8 @@ import { UpdateUser,
     LoginParams,
     VerificationParams,
     ResetPasswordParams,
-    SignupParams
+    SignupParams,
+    LoginResponse
 } from "./models"
 
 const BASE_END_POINT = "users"
@@ -43,7 +44,7 @@ export async function sendVerification(data: VerificationParams) {
 }
 
 export async function login(data: LoginParams) {
-  return await apiFetch<{ token: string }>({
+  return await apiFetch<LoginResponse>({
     method: "POST",
     endpoint: `${BASE_END_POINT}/login`,
     payload: data,
