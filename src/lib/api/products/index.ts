@@ -1,4 +1,3 @@
-import { verifyAndGetSession } from "@/lib/session"
 import { apiFetch } from ".."
 import {
   ProductResponse,
@@ -12,7 +11,7 @@ const BASE_END_POINT = "products"
 export async function getProduct(productId: string) {
   return await apiFetch<DetailedProductResponse>({
     method: "GET",
-    endpoint: `${BASE_END_POINT}?id=${productId}`,
+    endpoint: `${BASE_END_POINT}/?id=${productId}`,
     headers: { accept: "application/json" },
   })
 }
@@ -31,9 +30,10 @@ export async function getCollaborativeRecommendation() {
   return await apiFetch<Products>({
     method: "GET",
     endpoint: `${BASE_END_POINT}/collaborative`,
-    headers: { accept: "application/json",
+    headers: {
+      accept: "application/json",
       //Authorization: `Bearer ${token}`
-     },
+    },
   })
 }
 

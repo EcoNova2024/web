@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Toggle } from "@/components/ui/toggle"
 import Image from "next/image"
-import { getRandomProducts } from "@/lib/api/products"
+import { getProductsByStatus, getRandomProducts } from "@/lib/api/products"
 
 type Product = {
   id: string
@@ -49,10 +49,11 @@ export default function ProductListing(): JSX.Element {
           price: product.price,
           isNew: product.transactions.length > 1,
           isDamaged: product.transactions.length < 2,
-          image: product.transactions[0].image_url,
+          image: product.transactions[0].image_url || "/image.png",
         }))
 
-        if (transformedProducts) setProducts(transformedProducts)
+        if (transformedProducts)
+          setProducts((prev) => [...prev, ...transformedProducts])
       } catch (error) {
         console.error("An error occurred while fetching products:", error)
       } finally {
@@ -63,6 +64,38 @@ export default function ProductListing(): JSX.Element {
     fetchProducts()
   }, [])
 
+  useEffect(() => {
+    const fetchNew = async () => {
+      setLoading(true)
+      try {
+        const response = await getProductsByStatus("restored", "20", "1")
+        console.log("API Response:", response)
+
+        if (response.error) {
+          console.error("Failed to fetch products:", response.error.message)
+          return
+        }
+
+        const transformedProducts = response.body?.products.map((product) => ({
+          id: product.id,
+          name: decodeURIComponent(product.name), // Decode if necessary
+          price: product.price,
+          isNew: product.transactions.length > 1,
+          isDamaged: product.transactions.length < 2,
+          image: product.transactions[0].image_url || "/image.png",
+        }))
+
+        if (transformedProducts)
+          setProducts((prev) => [...prev, ...transformedProducts])
+      } catch (error) {
+        console.error("An error occurred while fetching products:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNew()
+  }, [])
   const handleNewProductsToggle = (newValue: boolean): void => {
     if (newValue && showDamagedProducts) {
       setShowDamagedProducts(false)
