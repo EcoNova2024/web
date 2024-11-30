@@ -54,6 +54,7 @@ export async function apiFetch<T>({
     console.debug("Request options:", option)
 
     // Make the API request
+
     const response = await fetch(
       `http://13.49.145.211:3000/${endpoint}`,
       option

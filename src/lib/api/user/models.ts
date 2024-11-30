@@ -40,3 +40,9 @@ export type SignupParams = {
   name: string
   password: string
 }
+
+export type LoginResponse = {
+  token: string
+  user: User
+  expires_at: string
+}
