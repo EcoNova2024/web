@@ -61,36 +61,6 @@ export default function ProductDetail() {
 
   const handleButtonClick = async () => {
     try {
-      // S3 URL'den resim alınıp Blob olarak dönüştürme
-      // const imageBlob = await fetch(currentImage, {
-      //   mode: "cors",
-      //   headers: {
-      //     "Content-Type": "image/png",
-      //   },
-      // })
-      //   .then((res) => res.blob())
-      //   .catch((error) => {
-      //     console.error("Error fetching image:", error)
-      //   })
-
-      // const reader = new FileReader()
-      // reader.readAsDataURL(imageBlob)
-      // reader.onloadend = () => {
-      //   const base64data = reader.result
-
-      //   // API'ye istek atma
-      //   axios
-      //     .post("http://127.0.0.1:5000/restore-image", { image: base64data })
-      //     .then((response) => {
-      //       // API'den gelen yanıtı yeni görüntü olarak ayarlama
-      //       const restoredImageURL = window.URL.createObjectURL(
-      //         new Blob([response.data])
-      //       )
-      //     })
-      //     .catch((error) => {
-      //       console.error("Error:", error)
-      //     })
-      // }
       setTimeout(() => {
         setNewImage("/restored_image.jpg")
       }, 2000)
@@ -148,19 +118,19 @@ export default function ProductDetail() {
   }, [id])
 
   const formatPrice = (price: number) =>
-    new Intl.NumberFormat("tr-TR", {
+    new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "TRY",
+      currency: "USD",
     }).format(price)
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge variant="default">Aktif</Badge>
+        return <Badge variant="default">Active</Badge>
       case "inactive":
-        return <Badge variant="outline">Pasif</Badge>
+        return <Badge variant="outline">Inactive</Badge>
       case "deleted":
-        return <Badge variant="destructive">Silinmiş</Badge>
+        return <Badge variant="destructive">Deleted</Badge>
       default:
         return null
     }
@@ -236,7 +206,7 @@ export default function ProductDetail() {
                   ))}
                 </div>
                 <span className="text-sm text-gray-600">
-                  ({product.rating_count} değerlendirme)
+                  ({product.rating_count} reviews)
                 </span>
               </div>
               <p className="text-3xl font-semibold mb-4">
@@ -244,12 +214,12 @@ export default function ProductDetail() {
               </p>
               <p className="text-gray-600 mb-6">{product.description}</p>
               <div className="flex gap-4 mb-6">
-                <Button size="lg">
-                  <Link href={`/contact/${product.user_id}`}>
+                <Link href={`/home/contact/${product.user_id}`}>
+                  <Button size="lg">
                     <Send size={16} className="mr-2" />
-                    Satıcı ile İletişime Geç
-                  </Link>
-                </Button>
+                    Contact Seller
+                  </Button>
+                </Link>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button
@@ -258,13 +228,12 @@ export default function ProductDetail() {
                       onClick={handleButtonClick}
                     >
                       <Bot size={16} className="mr-2" />
-                      AI ile Düzenle
+                      Edit with AI
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>
-                        {" "}
                         {newImage !== "/image.png"
                           ? "Restored Image"
                           : "AI working...."}
@@ -296,29 +265,29 @@ export default function ProductDetail() {
               </div>
               <Tabs defaultValue="details">
                 <TabsList>
-                  <TabsTrigger value="details">Detaylar</TabsTrigger>
-                  <TabsTrigger value="shipping">Ürün Hikayesi</TabsTrigger>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="shipping">Product Story</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
                   <ul className="list-disc pl-5">
                     <li>
-                      <span className="font-semibold">Kategori:</span>{" "}
+                      <span className="font-semibold">Category:</span>{" "}
                       {product.category}
                     </li>
                     <li>
-                      <span className="font-semibold">Alt Kategori:</span>{" "}
+                      <span className="font-semibold">Sub Category:</span>{" "}
                       {product.sub_category}
                     </li>
                     <li>
-                      <span className="font-semibold">Oluşturulma Tarihi:</span>
+                      <span className="font-semibold">Creation Date:</span>
                       {format(new Date(product.created_at), "dd.MM.yyyy HH:mm")}
                     </li>
                     <li>
-                      <span className="font-semibold">Satıcı ID:</span>{" "}
+                      <span className="font-semibold">Seller ID:</span>{" "}
                       {product.user_id}
                     </li>
                     <li>
-                      <span className="font-semibold">Decrsiption:</span>{" "}
+                      <span className="font-semibold">Description:</span>{" "}
                       {product.description}
                     </li>
                   </ul>
@@ -352,7 +321,7 @@ export default function ProductDetail() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-left mb-8 pt-14">
-              Önerilen Ürünler
+              Recommended Products
             </h1>
             <ProductSlider products={products} />
           </div>

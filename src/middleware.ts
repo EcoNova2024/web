@@ -22,19 +22,18 @@ export async function middleware(request: NextRequest) {
   })
 
   if (isProtectedRoute || isPublicRoute) {
-  const session = await verifyAndGetSession();
-  
-  console.log("Middleware - Session:", session);
+    const session = await verifyAndGetSession()
 
-  if (isProtectedRoute && !session) {
-    return NextResponse.redirect(new URL("/login", request.nextUrl));
+    console.log("Middleware - Session:", session)
+
+    if (isProtectedRoute && !session) {
+      return NextResponse.redirect(new URL("/login", request.nextUrl))
+    }
+
+    if (isPublicRoute && session) {
+      return NextResponse.redirect(new URL("/home", request.nextUrl))
+    }
   }
-
-  if (isPublicRoute && session) {
-    return NextResponse.redirect(new URL("/home", request.nextUrl));
-  }
-}
-
 
   return NextResponse.next()
 }
